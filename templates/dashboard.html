@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Enterprise KPI Monitoring{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h2><i class="fas fa-chart-bar"></i> KPI Dashboard</h2>
+        <div class="dashboard-controls">
+            <button id="refresh-btn" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <select id="department-filter" class="form-control" style="width: auto; display: inline-block; margin-left: 1rem;">
+                <option value="all">All Departments</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span id="total-departments" class="stat-number">{{ departments|length }}</span>
+            <div class="stat-label">Departments</div>
+        </div>
+        <div class="stat-card">
+            <span id="total-kpis" class="stat-number">0</span>
+            <div class="stat-label">Active KPIs</div>
+        </div>
+        <div class="stat-card">
+            <span id="total-data-points" class="stat-number">0</span>
+            <div class="stat-label">Data Points</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">
+                <i class="fas fa-clock"></i>
+            </span>
+            <div class="stat-label">Real-time Updates</div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" style="display: none; text-align: center; margin: 2rem 0;">
+        <div class="loading"></div>
+        <p>Loading dashboard data...</p>
+    </div>
+
+    <!-- Recent KPI Data -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-list"></i> Recent KPI Updates</h3>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>KPI Name</th>
+                        <th>Department</th>
+                        <th>Value</th>
+                        <th>Target</th>
+                        <th>Performance</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-kpis-tbody">
+                    {% for kpi in recent_kpis %}
+                    <tr>
+                        <td>{{ kpi.kpi.name if kpi.kpi else 'Unknown' }}</td>
+                        <td>{{ kpi.kpi.department.name if kpi.kpi and kpi.kpi.department else 'Unknown' }}</td>
+                        <td>{{ kpi.value }}</td>
+                        <td>{{ kpi.target or 'N/A' }}</td>
+                        <td>
+                            <span class="performance-badge performance-target">
+                                {{ kpi.get_performance_status() }}
+                            </span>
+                        </td>
+                        <td>{{ kpi.timestamp.strftime('%Y-%m-%d %H:%M') if kpi.timestamp else 'Unknown' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Department Overview -->
+    <div class="dashboard-grid">
+        {% for dept in departments %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ dept.name }}</h3>
+            </div>
+            <div class="card-body">
+                <p>{{ dept.description or 'No description available' }}</p>
+                <p><strong>KPIs:</strong> {{ dept.kpis|length }}</p>
+                <p><strong>Created:</strong> {{ dept.created_at.strftime('%Y-%m-%d') if dept.created_at else 'Unknown' }}</p>
+                <a href="/api/departments/{{ dept.id }}/kpis" class="btn btn-primary" target="_blank">
+                    <i class="fas fa-eye"></i> View KPIs
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- API Integration Status -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-plug"></i> Integration Status</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div>
+                    <h4><i class="fas fa-server"></i> REST API</h4>
+                    <p>Status: <span style="color: var(--success-color);">Active</span></p>
+                    <p>Endpoints: Available</p>
+                    <a href="/api/kpi/" target="_blank" class="btn btn-primary">View API</a>
+                </div>
+                <div>
+                    <h4><i class="fas fa-chart-pie"></i> Power BI</h4>
+                    <p>Status: <span style="color: var(--warning-color);">Configured</span></p>
+                    <p>Last Sync: Real-time</p>
+                    <button class="btn btn-success" onclick="alert('Power BI sync would be triggered here')">
+                        Sync Now
+                    </button>
+                </div>
+                <div>
+                    <h4><i class="fas fa-database"></i> Database</h4>
+                    <p>Status: <span style="color: var(--success-color);">Connected</span></p>
+                    <p>Records: <span id="total-data-points-db">Loading...</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

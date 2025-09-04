@@ -1,0 +1,29 @@
+import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
+
+# Load environment variables
+load_dotenv()
+
+# Your connection string
+DATABASE_URL = "mssql+pyodbc://localhost/KPI_Monitoring?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+
+print(f"Testing connection to: {DATABASE_URL}")
+
+try:
+    engine = create_engine(DATABASE_URL)
+    with engine.connect() as connection:
+        # Test the connection
+        result = connection.execute(text("SELECT @@VERSION as version, DB_NAME() as database_name"))
+        row = result.fetchone()
+        print("✅ Connection successful!")
+        print(f"Database: {row.database_name}")
+        print(f"SQL Server Version: {row.version[:50]}...")
+        
+except Exception as e:
+    print(f"❌ Connection failed: {e}")
+    print("\nTroubleshooting suggestions:")
+    print("1. Make sure SQL Server is running")
+    print("2. Check if database 'KPI_Monitoring' exists")
+    print("3. Try different server names: localhost, .\\SQLEXPRESS, (local)")
+    print("4. Ensure Windows Authentication is enabled")
