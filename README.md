@@ -56,18 +56,13 @@ POWERBI_WORKSPACE_ID=your-workspace-id
 ### 3. Database Setup
 
 ```bash
-# Initialize database with sample data
 python app.py
 ```
 
 ### 4. Run the Application
 
 ```bash
-# Development mode
 python app.py
-
-# Production mode
-gunicorn --bind 0.0.0.0:5000 app:app
 ```
 
 The application will be available at `http://localhost:5000`
@@ -149,10 +144,8 @@ The system automatically formats data for Power BI consumption:
 ```python
 from powerbi.integration import PowerBIIntegration
 
-# Initialize integration
 powerbi = PowerBIIntegration()
 
-# Sync data to Power BI
 from powerbi.integration import sync_kpi_data_to_powerbi
 sync_kpi_data_to_powerbi()
 ```
@@ -222,13 +215,10 @@ enterprise-kpi-system/
 Run the test suite:
 
 ```bash
-# Install test dependencies
 pip install pytest pytest-flask
 
-# Run tests
 pytest tests/
 
-# Run with coverage
 pytest --cov=. tests/
 ```
 
